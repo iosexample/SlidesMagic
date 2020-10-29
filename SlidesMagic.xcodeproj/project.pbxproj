@@ -84,6 +84,7 @@
 				872E8B7B1C034D4D008C0329 /* AppDelegate.swift */,
 				872E8B7D1C034D4D008C0329 /* ViewController.swift */,
 				872E8B8F1C034EE8008C0329 /* WindowController.swift */,
+				6088C66D25496E0F00E1525C /* CollectionViewItem.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -110,7 +111,6 @@
 		872E8B8E1C034E2D008C0329 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				6088C66D25496E0F00E1525C /* CollectionViewItem.swift */,
 				609F12F7254A56CB008C85A9 /* HeaderView.swift */,
 			);
 			name = Views;
@@ -326,6 +326,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = SlidesMagic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.razeware.SlidesMagic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -340,6 +341,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = SlidesMagic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.razeware.SlidesMagic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

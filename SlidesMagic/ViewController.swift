@@ -33,12 +33,14 @@ class ViewController: NSViewController {
   @IBOutlet weak var removeSlideButton: NSButton!
   
   let imageDirectoryLoader = ImageDirectoryLoader()
-
+  var indexPathsOfItemsBeingDragged: Set<IndexPath>!
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     let initialFolderUrl = URL(fileURLWithPath: "/Library/Desktop Pictures", isDirectory: true)
     imageDirectoryLoader.loadDataForFolderWithUrl(initialFolderUrl)
     configureCollectionView()
+    registerForDragAndDrop()
   }
   
   func loadDataForNewFolderWithUrl(_ folderURL: URL) {
@@ -101,7 +103,7 @@ class ViewController: NSViewController {
     openPanel.allowsMultipleSelection = true;
     openPanel.allowedFileTypes = ["public.image"]
     openPanel.beginSheetModal(for: self.view.window!) { (response) -> Void in
-      guard response.rawValue == NSFileHandlingPanelOKButton else { return }
+      guard response == NSApplication.ModalResponse.OK else { return }
       self.insertAtIndexPathFromURLs(urls: openPanel.urls, atIndexPath: insertAtIndexPath)
     }
   }
@@ -122,7 +124,13 @@ class ViewController: NSViewController {
       _ = imageDirectoryLoader.removeImageAtIndexPath(indexPath: itemIndexPath)
     }
     
-    collectionView.deleteItems(at: selectionIndexPaths)
+    collectionView.animator().deleteItems(at: selectionIndexPaths)
+  }
+  
+  func registerForDragAndDrop() {
+    collectionView.registerForDraggedTypes([NSPasteboard.PasteboardType.URL])
+    collectionView.setDraggingSourceOperationMask(NSDragOperation.every, forLocal: true)
+    collectionView.setDraggingSourceOperationMask(NSDragOperation.every, forLocal: false)
   }
 }
 
@@ -153,12 +161,18 @@ extension ViewController : NSCollectionViewDataSource {
   }
   
   func collectionView(_ collectionView: NSCollectionView, viewForSupplementaryElementOfKind kind: NSCollectionView.SupplementaryElementKind, at indexPath: IndexPath) -> NSView {
-    let view = collectionView.makeSupplementaryView(ofKind: NSCollectionView.elementKindSectionHeader, withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "HeaderView"), for: indexPath) as! HeaderView
-    view.sectionTitle.stringValue = "Section \(indexPath.section)"
-    let numberOfItemsInSection = imageDirectoryLoader.numberOfItemsInSection(indexPath.section)
-    view.imageCount.stringValue = "\(numberOfItemsInSection) image files"
-    
-    return view
+    if kind == NSCollectionView.elementKindSectionHeader {
+      let identifier: String = kind == NSCollectionView.elementKindSectionHeader ? "HeaderView" : ""
+      let view = collectionView.makeSupplementaryView(ofKind: NSCollectionView.elementKindSectionHeader, withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), for: indexPath) as! HeaderView
+      view.sectionTitle.stringValue = "Section \(indexPath.section)"
+      let numberOfItemsInSection = imageDirectoryLoader.numberOfItemsInSection(indexPath.section)
+      view.imageCount.stringValue = "\(numberOfItemsInSection) image files"
+      return view
+    }
+    else {
+      // FIXME: Can't see the aqua vertical line unless commented out this method
+      return NSView()
+    }
   }
 }
 
@@ -177,5 +191,65 @@ extension ViewController: NSCollectionViewDelegate {
   
   func collectionView(_ collectionView: NSCollectionView, didDeselectItemsAt indexPaths: Set<IndexPath>) {
     updateItems(state: .forDeselection, atIndexPaths: indexPaths)
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, canDragItemsAt indexes: IndexSet, with event: NSEvent) -> Bool {
+    return true
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> NSPasteboardWriting? {
+    let imageFile = imageDirectoryLoader.imageFileForIndexPath(indexPath)
+    return imageFile.url.absoluteURL as? NSURL
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, draggingSession session: NSDraggingSession, willBeginAt screenPoint: NSPoint, forItemsAt indexPaths: Set<IndexPath>) {
+    indexPathsOfItemsBeingDragged = indexPaths
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, validateDrop draggingInfo: NSDraggingInfo, proposedIndexPath proposedDropIndexPath: AutoreleasingUnsafeMutablePointer<NSIndexPath>, dropOperation proposedDropOperation: UnsafeMutablePointer<NSCollectionView.DropOperation>) -> NSDragOperation {
+    if proposedDropOperation.pointee == NSCollectionView.DropOperation.on {
+      proposedDropOperation.pointee = NSCollectionView.DropOperation.before
+    }
+    
+    if indexPathsOfItemsBeingDragged == nil {
+      return NSDragOperation.copy
+    } else {
+      return NSDragOperation.move
+//      let sectionOfItemBeingDragged = indexPathsOfItemsBeingDragged.first!.section
+//      let proposedDropsection = proposedDropIndexPath.pointee.section
+//      if sectionOfItemBeingDragged == proposedDropsection && indexPathsOfItemsBeingDragged.count == 1 {
+//        return NSDragOperation.move
+//      } else {
+//        return NSDragOperation(rawValue: 0)
+//      }
+    }
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, acceptDrop draggingInfo: NSDraggingInfo, indexPath: IndexPath, dropOperation: NSCollectionView.DropOperation) -> Bool {
+    if indexPathsOfItemsBeingDragged != nil {
+      let indexPathOfFirstItemBeingDragged = indexPathsOfItemsBeingDragged.first!
+      var toIndexPath: IndexPath
+      if indexPathOfFirstItemBeingDragged.compare(indexPath) == .orderedAscending {
+        toIndexPath = IndexPath(item: indexPath.item-1, section: indexPath.section)
+      } else {
+        toIndexPath = IndexPath(item: indexPath.item, section: indexPath.section)
+      }
+      
+      imageDirectoryLoader.moveImageFromIndexPath(indexPath: indexPathOfFirstItemBeingDragged, toIndexPath: toIndexPath)
+      collectionView.moveItem(at: indexPathOfFirstItemBeingDragged, to: toIndexPath)
+    } else {
+      var droppedObjects = Array<URL>()
+      draggingInfo.enumerateDraggingItems(options: NSDraggingItemEnumerationOptions.concurrent, for: collectionView, classes: [NSURL.self], searchOptions: [NSPasteboard.ReadingOptionKey.urlReadingFileURLsOnly : NSNumber(value: true)]) { (draggingItem, idx, stop) in
+        if let url = draggingItem.item as? URL {
+          droppedObjects.append(url)
+        }
+      }
+      insertAtIndexPathFromURLs(urls: droppedObjects, atIndexPath: indexPath)
+    }
+    return true
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint, dragOperation operation: NSDragOperation) {
+    indexPathsOfItemsBeingDragged = nil
   }
 }

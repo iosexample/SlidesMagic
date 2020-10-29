@@ -190,4 +190,19 @@ class ImageDirectoryLoader: NSObject {
     
     return imageFileRemoved
   }
+  
+  func moveImageFromIndexPath(indexPath: IndexPath, toIndexPath: IndexPath) {
+    let itemBeingDragged = removeImageAtIndexPath(indexPath: indexPath)
+    
+    let destinationIsLower = indexPath.compare(toIndexPath) == .orderedDescending
+    var indexPathOfDestination: IndexPath
+    
+    if destinationIsLower {
+      indexPathOfDestination = toIndexPath
+    } else {
+      indexPathOfDestination = IndexPath(item: toIndexPath.item-1, section: toIndexPath.section)
+    }
+    
+    insertImage(image: itemBeingDragged, atIndexPath: indexPathOfDestination)
+  }
 }
