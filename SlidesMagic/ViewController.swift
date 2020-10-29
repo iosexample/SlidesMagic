@@ -48,15 +48,23 @@ class ViewController: NSViewController {
     // 1
     let flowLayout = NSCollectionViewFlowLayout()
     flowLayout.itemSize = NSSize(width: 160.0, height: 140.0)
-    flowLayout.sectionInset = NSEdgeInsets(top: 10.0, left: 20.0, bottom: 10.0, right: 20.0)
+    flowLayout.sectionInset = NSEdgeInsets(top: 30.0, left: 20.0, bottom: 30.0, right: 20.0)
     flowLayout.minimumInteritemSpacing = 20.0
     flowLayout.minimumLineSpacing = 20.0
+    flowLayout.sectionHeadersPinToVisibleBounds = true
     collectionView.collectionViewLayout = flowLayout
-    // 2
-    view.wantsLayer = true
-    // 3
+    collectionView.wantsLayer = true
     collectionView.layer?.backgroundColor = NSColor.black.cgColor
   }
+  
+  @IBAction func showHideSections(_ sender: NSButton) {
+    let show = sender.state
+    imageDirectoryLoader.singleSectionMode = (show == .off)
+    // The nil value passed means you skip image loading — same images, different layout.
+    imageDirectoryLoader.setupDataForUrls(nil)
+    collectionView.reloadData()
+  }
+  
 }
 
 extension ViewController : NSCollectionViewDataSource {
@@ -84,5 +92,18 @@ extension ViewController : NSCollectionViewDataSource {
     return item
   }
   
+  func collectionView(_ collectionView: NSCollectionView, viewForSupplementaryElementOfKind kind: NSCollectionView.SupplementaryElementKind, at indexPath: IndexPath) -> NSView {
+    let view = collectionView.makeSupplementaryView(ofKind: NSCollectionView.elementKindSectionHeader, withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "HeaderView"), for: indexPath) as! HeaderView
+    view.sectionTitle.stringValue = "Section \(indexPath.section)"
+    let numberOfItemsInSection = imageDirectoryLoader.numberOfItemsInSection(indexPath.section)
+    view.imageCount.stringValue = "\(numberOfItemsInSection) image files"
+    
+    return view
+  }
 }
 
+extension ViewController: NSCollectionViewDelegateFlowLayout {
+  func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> NSSize {
+    return imageDirectoryLoader.singleSectionMode ? NSZeroSize : NSSize(width: 1000, height: 40)
+  }
+}

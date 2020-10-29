@@ -677,14 +677,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <scrollView wantsLayer="YES" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eeJ-dn-qts">
-                                <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <scrollView wantsLayer="YES" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eeJ-dn-qts">
+                                <rect key="frame" x="0.0" y="30" width="480" height="240"/>
                                 <clipView key="contentView" id="Gij-UV-yO5">
-                                    <rect key="frame" x="1" y="1" width="478" height="268"/>
+                                    <rect key="frame" x="1" y="1" width="478" height="238"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <collectionView id="bKn-QM-Qfn">
-                                            <rect key="frame" x="0.0" y="0.0" width="478" height="158"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="478" height="238"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                             <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="10" minimumLineSpacing="10" id="brw-gn-MRC">
                                                 <size key="itemSize" width="50" height="50"/>
@@ -692,12 +692,13 @@
                                             <color key="primaryBackgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <connections>
                                                 <outlet property="dataSource" destination="XfG-lQ-9wD" id="4cR-R4-tMW"/>
+                                                <outlet property="delegate" destination="XfG-lQ-9wD" id="38M-Z8-4im"/>
                                             </connections>
                                         </collectionView>
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="5cg-6c-hLP">
-                                    <rect key="frame" x="1" y="253" width="478" height="16"/>
+                                    <rect key="frame" x="-100" y="-100" width="478" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="E15-rr-Xfs">
@@ -705,12 +706,24 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3Ub-1A-NiZ">
+                                <rect key="frame" x="18" y="6" width="112" height="18"/>
+                                <buttonCell key="cell" type="check" title="Show Sections" bezelStyle="regularSquare" imagePosition="left" inset="2" id="2Hy-X2-7Pf">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="showHideSections:" target="XfG-lQ-9wD" id="ZHD-1d-iGd"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="3Ub-1A-NiZ" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" symbolic="YES" id="4re-UT-85D"/>
                             <constraint firstItem="eeJ-dn-qts" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Gz8-a9-L1L"/>
-                            <constraint firstAttribute="bottom" secondItem="eeJ-dn-qts" secondAttribute="bottom" id="X1O-pW-cAP"/>
+                            <constraint firstAttribute="bottom" secondItem="eeJ-dn-qts" secondAttribute="bottom" constant="30" id="X1O-pW-cAP"/>
                             <constraint firstItem="eeJ-dn-qts" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="aLa-bf-r2Q"/>
                             <constraint firstAttribute="trailing" secondItem="eeJ-dn-qts" secondAttribute="trailing" id="cAS-Py-hzR"/>
+                            <constraint firstAttribute="bottom" secondItem="3Ub-1A-NiZ" secondAttribute="bottom" constant="8" id="dLC-kC-0z7"/>
                         </constraints>
                     </view>
                     <connections>
