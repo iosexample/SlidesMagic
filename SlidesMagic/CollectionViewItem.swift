@@ -30,6 +30,14 @@ class CollectionViewItem: NSCollectionViewItem {
     
     view.wantsLayer = true
     view.layer?.backgroundColor = NSColor.lightGray.cgColor
+    
+    view.layer?.borderColor = NSColor.white.cgColor
+    view.layer?.borderWidth = 0.0
   }
     
+  override var isSelected: Bool {
+    didSet {
+      view.layer?.borderWidth = isSelected ? 4.0 : 0.0
+    }
+  }
 }
