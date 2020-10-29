@@ -41,7 +41,7 @@ class ImageDirectoryLoader: NSObject {
   // sectionLengthArray[0] is 7, i.e. put the first 7 images from the imageFiles array into section 0
   // sectionLengthArray[1] is 5, i.e. put the next 5 images from the imageFiles array into section 1
   // and so on...
-  fileprivate let sectionLengthArray = [7, 5, 10, 2, 11, 7, 10, 12, 20, 25, 10, 3, 30, 25, 40]
+  fileprivate var sectionLengthArray = [7, 5, 10, 2, 11, 7, 10, 12, 20, 25, 10, 3, 30, 25, 40]
   fileprivate var sectionsAttributesArray = [SectionAttributes]()
   
   func setupDataForUrls(_ urls: [URL]?) {
@@ -161,4 +161,33 @@ class ImageDirectoryLoader: NSObject {
     setupDataForUrls(urls)
   }
   
+  func insertImage(image: ImageFile, atIndexPath: IndexPath) {
+    let imageIndexInImageFiles = sectionsAttributesArray[atIndexPath.section].sectionOffset + atIndexPath.item
+    imageFiles.insert(image, at: imageIndexInImageFiles)
+    
+    let sectionToUpdate = atIndexPath.section
+    sectionsAttributesArray[sectionToUpdate].sectionLength += 1
+    sectionLengthArray[sectionToUpdate] += 1
+    
+    if sectionToUpdate < numberOfSections-1 {
+      for i in sectionToUpdate+1...numberOfSections-1 {
+        sectionsAttributesArray[i].sectionOffset += 1
+      }
+    }
+  }
+  
+  func removeImageAtIndexPath(indexPath: IndexPath) -> ImageFile {
+    let imageIndexInImageFiles = sectionsAttributesArray[indexPath.section].sectionOffset + indexPath.item
+    let imageFileRemoved = imageFiles.remove(at: imageIndexInImageFiles)
+    let sectionToUpdate = indexPath.section
+    sectionsAttributesArray[sectionToUpdate].sectionLength -= 1
+    
+    if sectionToUpdate < numberOfSections-1 {
+      for i in sectionToUpdate+1...numberOfSections-1 {
+        sectionsAttributesArray[i].sectionOffset -= 1
+      }
+    }
+    
+    return imageFileRemoved
+  }
 }

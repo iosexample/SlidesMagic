@@ -29,6 +29,8 @@ import Cocoa
 class ViewController: NSViewController {
   
   @IBOutlet weak var collectionView: NSCollectionView!
+  @IBOutlet weak var addSlideButton: NSButton!
+  @IBOutlet weak var removeSlideButton: NSButton!
   
   let imageDirectoryLoader = ImageDirectoryLoader()
 
@@ -65,30 +67,88 @@ class ViewController: NSViewController {
     collectionView.reloadData()
   }
   
+  func updateItems(state:  NSCollectionViewItem.HighlightState, atIndexPaths: Set<IndexPath>) {
+    for indexPath in atIndexPaths {
+      guard let item = collectionView.item(at: indexPath) as? CollectionViewItem else { continue }
+      item.highlightState = state
+    }
+    
+    addSlideButton.isEnabled = collectionView.selectionIndexPaths.count == 1
+    removeSlideButton.isEnabled = !collectionView.selectionIndexPaths.isEmpty
+  }
+  
+  private func insertAtIndexPathFromURLs(urls: [URL], atIndexPath: IndexPath) {
+    var indexPaths: Set<IndexPath> = []
+    let section = atIndexPath.section
+    var currentItem = atIndexPath.item
+    
+    for url in urls {
+      guard let imageFile = ImageFile(url: url) else { continue }
+      let currentIndexPath = IndexPath(item: currentItem, section: section)
+      imageDirectoryLoader.insertImage(image: imageFile, atIndexPath: currentIndexPath)
+      indexPaths.insert(currentIndexPath)
+      currentItem += 1
+    }
+    
+    collectionView.insertItems(at: indexPaths)
+  }
+  
+  @IBAction func addSlide(sender: NSButton) {
+    let insertAtIndexPath = collectionView.selectionIndexPaths.first!
+    let openPanel = NSOpenPanel()
+    openPanel.canChooseDirectories = false
+    openPanel.canChooseFiles = true
+    openPanel.allowsMultipleSelection = true;
+    openPanel.allowedFileTypes = ["public.image"]
+    openPanel.beginSheetModal(for: self.view.window!) { (response) -> Void in
+      guard response.rawValue == NSFileHandlingPanelOKButton else { return }
+      self.insertAtIndexPathFromURLs(urls: openPanel.urls, atIndexPath: insertAtIndexPath)
+    }
+  }
+  
+  @IBAction func removeSlide(sender: NSButton) {
+    
+    let selectionIndexPaths = collectionView.selectionIndexPaths
+    if selectionIndexPaths.isEmpty {
+      return
+    }
+    
+    var selectionArray = Array(selectionIndexPaths)
+    selectionArray.sort { (path1, path2) -> Bool in
+      path1.compare(path2) == .orderedDescending
+    }
+    
+    for itemIndexPath in selectionArray {
+      _ = imageDirectoryLoader.removeImageAtIndexPath(indexPath: itemIndexPath)
+    }
+    
+    collectionView.deleteItems(at: selectionIndexPaths)
+  }
 }
 
 extension ViewController : NSCollectionViewDataSource {
-  
-  // 1
   func numberOfSections(in collectionView: NSCollectionView) -> Int {
     return imageDirectoryLoader.numberOfSections
   }
   
-  // 2
   func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
     return imageDirectoryLoader.numberOfItemsInSection(section)
   }
   
-  // 3
   func collectionView(_ itemForRepresentedObjectAtcollectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
     
-    // 4
     let item = collectionView.makeItem(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "CollectionViewItem"), for: indexPath)
     guard let collectionViewItem = item as? CollectionViewItem else {return item}
     
-    // 5
     let imageFile = imageDirectoryLoader.imageFileForIndexPath(indexPath)
     collectionViewItem.imageFile = imageFile
+    
+    if let selectedIndexPath = collectionView.selectionIndexPaths.first, selectedIndexPath == indexPath {
+      collectionViewItem.highlightState = .forSelection
+    } else {
+      collectionViewItem.highlightState = .forDeselection
+    }
+    
     return item
   }
   
@@ -105,5 +165,17 @@ extension ViewController : NSCollectionViewDataSource {
 extension ViewController: NSCollectionViewDelegateFlowLayout {
   func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> NSSize {
     return imageDirectoryLoader.singleSectionMode ? NSZeroSize : NSSize(width: 1000, height: 40)
+  }
+}
+
+extension ViewController: NSCollectionViewDelegate {
+  func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+    
+    updateItems(state: .forSelection,
+                   atIndexPaths: indexPaths)
+  }
+  
+  func collectionView(_ collectionView: NSCollectionView, didDeselectItemsAt indexPaths: Set<IndexPath>) {
+    updateItems(state: .forDeselection, atIndexPaths: indexPaths)
   }
 }

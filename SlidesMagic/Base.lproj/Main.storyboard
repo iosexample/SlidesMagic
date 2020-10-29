@@ -683,7 +683,7 @@
                                     <rect key="frame" x="1" y="1" width="478" height="238"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <collectionView selectable="YES" id="bKn-QM-Qfn">
+                                        <collectionView selectable="YES" allowsMultipleSelection="YES" id="bKn-QM-Qfn">
                                             <rect key="frame" x="0.0" y="0.0" width="478" height="238"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                             <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="10" minimumLineSpacing="10" id="brw-gn-MRC">
@@ -716,18 +716,44 @@
                                     <action selector="showHideSections:" target="XfG-lQ-9wD" id="ZHD-1d-iGd"/>
                                 </connections>
                             </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IFm-Pm-8OH">
+                                <rect key="frame" x="401" y="-3" width="65" height="32"/>
+                                <buttonCell key="cell" type="push" title="Add" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" inset="2" id="6tN-hO-SPi">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="addSlideWithSender:" target="XfG-lQ-9wD" id="dff-5L-xFM"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RVG-sX-jDB">
+                                <rect key="frame" x="312" y="-3" width="89" height="32"/>
+                                <buttonCell key="cell" type="push" title="Remove" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="KIZ-Vj-2y2">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="removeSlideWithSender:" target="XfG-lQ-9wD" id="eNE-gm-nmO"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="3Ub-1A-NiZ" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" symbolic="YES" id="4re-UT-85D"/>
+                            <constraint firstAttribute="bottom" secondItem="RVG-sX-jDB" secondAttribute="bottom" constant="4" id="4uf-Hh-YP7"/>
+                            <constraint firstAttribute="bottom" secondItem="IFm-Pm-8OH" secondAttribute="bottom" constant="4" id="FPM-ad-xx9"/>
                             <constraint firstItem="eeJ-dn-qts" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Gz8-a9-L1L"/>
+                            <constraint firstItem="IFm-Pm-8OH" firstAttribute="leading" secondItem="RVG-sX-jDB" secondAttribute="trailing" constant="12" symbolic="YES" id="P7M-oL-XNu"/>
                             <constraint firstAttribute="bottom" secondItem="eeJ-dn-qts" secondAttribute="bottom" constant="30" id="X1O-pW-cAP"/>
                             <constraint firstItem="eeJ-dn-qts" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="aLa-bf-r2Q"/>
                             <constraint firstAttribute="trailing" secondItem="eeJ-dn-qts" secondAttribute="trailing" id="cAS-Py-hzR"/>
                             <constraint firstAttribute="bottom" secondItem="3Ub-1A-NiZ" secondAttribute="bottom" constant="8" id="dLC-kC-0z7"/>
+                            <constraint firstAttribute="trailing" secondItem="IFm-Pm-8OH" secondAttribute="trailing" constant="20" symbolic="YES" id="pHT-9z-zq6"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="addSlideButton" destination="IFm-Pm-8OH" id="wPn-7l-isg"/>
                         <outlet property="collectionView" destination="bKn-QM-Qfn" id="REA-gE-er8"/>
+                        <outlet property="removeSlideButton" destination="RVG-sX-jDB" id="mB9-bf-zDT"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
